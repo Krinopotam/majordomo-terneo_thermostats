@@ -20,7 +20,7 @@ if (!$tmp['ID'])
 }
 else
 {
-   $checkEvery=600; // poll every 10 minutes
+   $checkEvery=300; // poll every 5 minutes
 }
 
 echo date("H:i:s") . " running " . basename(__FILE__) . PHP_EOL;
