@@ -179,6 +179,10 @@
                 {
                     $this->search_terneo_thermostats($out);
                 }
+                if ($this->view_mode == 'update_terneo_thermostats')
+                {
+                    $this->update_terneo_thermostats($out);
+                }
                 if ($this->view_mode == 'edit_terneo_thermostats')
                 {
                     $this->edit_terneo_thermostats($out, $this->id);
@@ -228,6 +232,18 @@
             require(DIR_MODULES . $this->name . '/terneo_thermostats_search.inc.php');
         }
 
+
+        /**
+         * terneo_thermostats update
+         *
+         * @access public
+         */
+        function update_terneo_thermostats(&$out)
+        {
+            $this->loadDevicesStatus();
+            $this->redirect("?data_source=terneo_thermostats");
+        }
+
         /**
          * terneo_thermostats edit/add
          *
@@ -274,13 +290,53 @@
         {
             $this->getConfig();
             $table = 'terneo_thermostat_values';
-            $properties = SQLSelect("SELECT ID FROM $table WHERE LINKED_OBJECT LIKE '" . DBSafe($object) . "' AND LINKED_PROPERTY LIKE '" . DBSafe($property) . "'");
+            $properties = SQLSelect("SELECT * FROM $table WHERE LINKED_OBJECT LIKE '" . DBSafe($object) . "' AND LINKED_PROPERTY LIKE '" . DBSafe($property) . "'");
             $total = count($properties);
             if ($total)
             {
                 for ($i = 0; $i < $total; $i++)
                 {
-                    //to-do
+                    $isUpdated=false;
+                    $confirmedValue = 0;
+
+                    if ($properties[$i]['TITLE'] == 'powerOff')
+                    {
+                        $properties[$i]['VALUE'] = $value;
+                        $result = $this->ApiPut("/device/" . $properties[$i]['DEVICE_SID'] . "/parameters/", '[{"key": "powerOff", "value": ' . ($value==1 ? "true" : "false") . '}]');
+
+                        if (is_array($result) && isset($result[0]) && $result[0]['key'] == "powerOff")
+                        {
+                            $confirmedValue = ($result[0]['value']=="False" ? 0 : 1);
+                            $isUpdated = TRUE;
+                        }
+                    }
+                    elseif ($properties[$i]['TITLE'] == 'mode')
+                    {
+                        $properties[$i]['VALUE'] = $value;
+                        $result = $this->ApiPut("/device/" . $properties[$i]['DEVICE_SID'] . "/parameters/", '[{"key": "mode", "value": ' . $value . '}]');
+
+                        if (is_array($result) && isset($result[0]) && $result[0]['key'] == "mode")
+                        {
+                            $confirmedValue = $result[0]['value'];
+                            $isUpdated = TRUE;
+                        }
+                    }
+                    elseif ($properties[$i]['TITLE'] == 'temp_setpoint')
+                    {
+                        $properties[$i]['VALUE'] = $value;
+                        $result = $this->ApiPut("/device/" . $properties[$i]['DEVICE_SID'] . "/setpoint/", '{"value": ' . $value . '}');
+
+                        if (is_array($result) && isset($result['value']))
+                        {
+                            $confirmedValue = $result['value'];
+                            $isUpdated = TRUE;
+                        }
+                    }
+
+                    if ($isUpdated)
+                    {
+                        SQLExec("UPDATE  $table SET VALUE='" . DBSafe($confirmedValue) . "', UPDATED='" . date('Y-m-d H:i:s') . "' WHERE ID=" . (int)$properties[$i]['ID']);
+                    }
                 }
             }
         }
@@ -378,7 +434,7 @@
         }
 
         /**
-         * Возвращает более детальную информацию о конкретном термостате
+         * Возвращает более о конкретном термостате
          * @param int $id идентификатор термостата (id)
          * @return mixed|null
          */
@@ -400,9 +456,31 @@
         }
 
         /**
+         * Возвращает дополнительные параметры конкретного термостата (зачем то они сделаны отдельно)
+         * @param int $id
+         * @return mixed|null
+         */
+        private function getDeviceParameters($id)
+        {
+            if ($this->config['API_KEY'] == "")
+            {
+                $this->getToken();
+            }
+
+            if ($this->config['API_KEY'] == "" || $this->config['API_KEY'] == "Error")
+            {
+                return NULL;
+            }
+
+            $result = $this->ApiGet("/device/" . $id . "/parameters/");
+
+            return $result;
+        }
+
+        /**
          * Загружает и обновляет значения термостатов
          */
-        private function loadDevicesStatus()
+        function loadDevicesStatus()
         {
             $equipments =  $this->getAllDevicesInfo();
 
@@ -439,128 +517,166 @@
                     return;
                 }
 
-                $device =  $this->getDeviceInfo($rec['SID']);
+                $this->loadValues($rec['ID'], $rec['SID']);
+            }
+        }
 
-                if (!is_array($device) or !isset($device['data']))
+        /**
+         * Обновление значений устройства
+         * @param int $deviceId устройства в БД
+         * @param int $sid системный ID устройства на сайте Terneo
+         */
+        function loadValues($deviceId, $sid)
+        {
+            $rec_vals=array();
+            $rec_val=array();
+
+            $deviceParameters =  $this->getDeviceParameters($sid);
+
+            if (is_array($deviceParameters))
+            {
+                foreach ($deviceParameters as $parameterKey => $parameterValue)
                 {
-                    return;
+                    if ($parameterValue['key'] == "mode")
+                    {
+                        $rec_val['DEVICE_ID'] = $deviceId;
+                        $rec_val['DEVICE_SID'] = $sid;
+                        $rec_val['TITLE'] = "mode";
+                        $rec_val['DESCRIPTION'] = "(R/W) Режим (0 - по расписанию, 1 - ручной)";
+                        $rec_val['VALUE'] = $parameterValue['value'];
+                        $rec_vals[] = $rec_val;
+                    }
+
+                    elseif ($parameterValue['key'] == "powerOff")
+                    {
+                        $rec_val['DEVICE_ID'] = $deviceId;
+                        $rec_val['DEVICE_SID'] = $sid;
+                        $rec_val['TITLE'] = "powerOff";
+                        $rec_val['DESCRIPTION'] = "(R/W) Выключение (0 - вкл, 1 - выкл.)";
+                        $rec_val['VALUE'] = ($parameterValue['value'] ? 1 : 0);
+                        $rec_vals[] = $rec_val;
+                    }
                 }
+            }
 
-                $rec_vals=array();
-                $rec_val=array();
+            $device =  $this->getDeviceInfo($sid);
 
+            if (is_array($device) && isset($device['data']))
+            {
+                if (is_array($device['data']) and isset($device['data']['temp_setpoint']))
+                {
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
+                    $rec_val['TITLE'] = "temp_setpoint";
+                    $rec_val['DESCRIPTION'] = " (R/W) Установленная температура";
+                    $rec_val['VALUE'] = $device['data']['temp_setpoint'];
+                    $rec_vals[] = $rec_val;
+                }
+                
                 if (is_array($device['data']) and isset($device['data']['temp_current']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "temp_current";
-                    $rec_val['DESCRIPTION'] = "Текущая температура";
+                    $rec_val['DESCRIPTION'] = " (R/O) Текущая температура";
                     $rec_val['VALUE'] = $device['data']['temp_current'];
                     $rec_vals[] = $rec_val;
                 }
 
-                if (is_array($device['data']) and isset($device['data']['temp_setpoint']))
+                 if (is_array($device['data']) and isset($device['data']['setpoint_state']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
-                    $rec_val['TITLE'] = "temp_setpoint";
-                    $rec_val['DESCRIPTION'] = "Установленная температура";
-                    $rec_val['VALUE'] = $device['data']['temp_setpoint'];
-                    $rec_vals[] = $rec_val;
-                }
-
-                if (is_array($device['data']) and isset($device['data']['setpoint_state']))
-                {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "setpoint_state";
-                    $rec_val['DESCRIPTION'] = "Установленная температура достигнута";
-                    $rec_val['VALUE'] = ($device['data']['setpoint_state'] ? 1:0);
+                    $rec_val['DESCRIPTION'] = "(R/O) Установленная температура достигнута";
+                    $rec_val['VALUE'] = ($device['data']['setpoint_state'] ? 1 : 0);
                     $rec_vals[] = $rec_val;
                 }
 
                 if (is_array($device['data']) and isset($device['data']['temperature_limits']) and isset($device['data']['temperature_limits']['max_value']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "temperature_max_limit";
-                    $rec_val['DESCRIPTION'] = "MAX лимит температуры";
+                    $rec_val['DESCRIPTION'] = "(R/O) MAX лимит температуры";
                     $rec_val['VALUE'] = $device['data']['temperature_limits']['max_value'];
                     $rec_vals[] = $rec_val;
                 }
 
                 if (is_array($device['data']) and isset($device['data']['temperature_limits']) and isset($device['data']['temperature_limits']['min_value']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "temperature_min_limit";
-                    $rec_val['DESCRIPTION'] = "MIN лимит температуры";
+                    $rec_val['DESCRIPTION'] = "(R/O) MIN лимит температуры";
                     $rec_val['VALUE'] = $device['data']['temperature_limits']['min_value'];
                     $rec_vals[] = $rec_val;
                 }
 
                 if (is_array($device['data']) and isset($device['data']['temp_mode_type']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "temp_mode_type";
-                    $rec_val['DESCRIPTION'] = "Режим температуры";
+                    $rec_val['DESCRIPTION'] = "(R/O) Режим температуры";
                     $rec_val['VALUE'] = $device['data']['temp_mode_type'];
                     $rec_vals[] = $rec_val;
                 }
 
                 if (is_array($device['data']) and isset($device['data']['overheat_state']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "overheat_state";
-                    $rec_val['DESCRIPTION'] = "Статус перегрева";
+                    $rec_val['DESCRIPTION'] = "(R/O) Статус перегрева";
                     $rec_val['VALUE'] = ($device['data']['overheat_state'] ? 1 : 0);
-                    $rec_vals[] = $rec_val;
-                }
-
-                if (is_array($device['data']) and isset($device['data']['lock_mode']))
-                {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
-                    $rec_val['TITLE'] = "lock_mode";
-                    $rec_val['DESCRIPTION'] = "Защита от детей";
-                    $rec_val['VALUE'] = ($device['data']['lock_mode'] ? 1 : 0);
                     $rec_vals[] = $rec_val;
                 }
 
                 if (is_array($device['data']) and isset($device['data']['is_online']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "is_online";
-                    $rec_val['DESCRIPTION'] = "Онлайн";
-                    $rec_val['VALUE'] = ($device['data']['is_online']?1:0);
+                    $rec_val['DESCRIPTION'] = "(R/O) Онлайн";
+                    $rec_val['VALUE'] = ($device['data']['is_online'] ? 1 : 0);
                     $rec_vals[] = $rec_val;
                 }
 
                 if (is_array($device['data']) and isset($device['data']['connection_state']) and isset($device['data']['connection_state']['state']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "connection_state";
-                    $rec_val['DESCRIPTION'] = "Статус подключения";
-                    $rec_val['VALUE'] = ($device['data']['connection_state']['state'] ? 1: 0);
+                    $rec_val['DESCRIPTION'] = "(R/O) Статус подключения";
+                    $rec_val['VALUE'] = ($device['data']['connection_state']['state'] ? 1 : 0);
                     $rec_vals[] = $rec_val;
                 }
 
                 if (is_array($device['data']) and isset($device['data']['connection_state']) and isset($device['data']['connection_state']['offline_minutes']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "offline_minutes";
-                    $rec_val['DESCRIPTION'] = "Минут offline";
+                    $rec_val['DESCRIPTION'] = "(R/O) Минут offline";
                     $rec_val['VALUE'] = $device['data']['connection_state']['offline_minutes'];
                     $rec_vals[] = $rec_val;
                 }
 
                 if (is_array($device['data']) and isset($device['data']['connection_state']) and isset($device['data']['connection_state']['last_connection_time']))
                 {
-                    $rec_val['DEVICE_ID'] = $rec['ID'];
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "last_connection_time";
-                    $rec_val['DESCRIPTION'] = "Время последнего подключения";
+                    $rec_val['DESCRIPTION'] = "(R/O) Время последнего подключения";
                     $rec_val['VALUE'] = $device['data']['connection_state']['last_connection_time'];
                     $rec_vals[] = $rec_val;
                 }
+            }
 
-                foreach ($rec_vals as $rec_val)
-                {
-                    $this->processValues($rec['ID'], $rec_val);
-                }
+            foreach ($rec_vals as $rec_val)
+            {
+                $this->processValues($deviceId, $rec_val);
             }
         }
 
@@ -583,6 +699,7 @@
             else
             {
                 $old_value = $old_rec['VALUE'];
+
                 $rec_val['ID'] = $old_rec['ID'];
                 $rec_val['DEVICE_ID'] = $old_rec['DEVICE_ID'];
                 $rec_val['LINKED_OBJECT'] = $old_rec['LINKED_OBJECT'];
@@ -645,6 +762,35 @@
                     'header'  => "Authorization: " . "Token " . $this->config['API_KEY'],
                     'method'  => 'GET',
                     'content' => http_build_query($data)
+                )
+            );
+
+            $context = stream_context_create($options);
+            $result = file_get_contents($this->config['API_URL'] . $apiPath, FALSE, $context);
+
+            if (!$result)
+            {
+                return NULL;
+            }
+
+            return $this->json_array($result);
+        }
+
+        /**
+         * @param string $apiPath путь в Api
+         * @param array $data [optional] дополнительные данные для отправки
+         * @return mixed|null
+         */
+        private function ApiPut($apiPath, $data)
+        {
+            // use key 'http' even if you send the request to https://...
+            $options = array
+            (
+                'http' => array
+                (
+                    'header'  => "Authorization: " . "Token " . $this->config['API_KEY'] . "\r\nContent-Type: application/json",
+                    'method'  => 'PUT',
+                    'content' => $data
                 )
             );
 
@@ -738,6 +884,7 @@
  terneo_thermostat_values: DESCRIPTION varchar(100) NOT NULL DEFAULT ''
  terneo_thermostat_values: VALUE varchar(255) NOT NULL DEFAULT ''
  terneo_thermostat_values: DEVICE_ID int(10) NOT NULL DEFAULT '0'
+ terneo_thermostat_values: DEVICE_SID varchar(10) NOT NULL DEFAULT ''
  terneo_thermostat_values: LINKED_OBJECT varchar(100) NOT NULL DEFAULT ''
  terneo_thermostat_values: LINKED_PROPERTY varchar(100) NOT NULL DEFAULT ''
  terneo_thermostat_values: LINKED_METHOD varchar(100) NOT NULL DEFAULT ''
