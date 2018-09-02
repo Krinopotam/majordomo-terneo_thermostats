@@ -10,6 +10,8 @@
     //
     class terneo_thermostats extends module
     {
+        const API_URL = "https://api.hmarex.com";
+
         /**
          * terneo_thermostats
          *
@@ -23,6 +25,7 @@
             $this->title = "Термостаты Terneo";
             $this->module_category = "<#LANG_SECTION_DEVICES#>";
             $this->checkInstalled();
+
         }
 
         /**
@@ -148,7 +151,7 @@
         function admin(&$out)
         {
             $this->getConfig();
-            $out['API_URL'] = $this->config['API_URL'];
+            $out['API_URL'] = self::API_URL;
             if (!$out['API_URL'])
             {
                 $out['API_URL'] = 'http://';
@@ -159,7 +162,7 @@
             if ($this->view_mode == 'update_settings')
             {
                 global $api_url;
-                $this->config['API_URL'] = $api_url;
+                $this->config['API_URL'] = self::API_URL;
                 global $api_key;
                 $this->config['API_KEY'] = $api_key;
                 global $api_username;
@@ -371,7 +374,7 @@
          */
         private function  getToken()
         {
-            if (!isset($this->config['API_USERNAME']) or $this->config['API_USERNAME'] == "" or !isset($this->config['API_PASSWORD']) or $this->config['API_PASSWORD'] == "" or !isset($this->config['API_URL']) or $this->config['API_URL'] == "")
+            if (!isset($this->config['API_USERNAME']) or $this->config['API_USERNAME'] == "" or !isset($this->config['API_PASSWORD']) or $this->config['API_PASSWORD'] == "")
             {
                 return "";
             }
@@ -390,7 +393,7 @@
             );
 
             $context = stream_context_create($options);
-            $result = file_get_contents($this->config['API_URL'] . "/login/", FALSE, $context);
+            $result = file_get_contents(self::API_URL . "/login/", FALSE, $context);
             if (!$result)
             {
                 $this->config['API_KEY'] = "Error";
@@ -766,7 +769,7 @@
             );
 
             $context = stream_context_create($options);
-            $result = file_get_contents($this->config['API_URL'] . $apiPath, FALSE, $context);
+            $result = file_get_contents(self::API_URL . $apiPath, FALSE, $context);
 
             if (!$result)
             {
@@ -795,7 +798,7 @@
             );
 
             $context = stream_context_create($options);
-            $result = file_get_contents($this->config['API_URL'] . $apiPath, FALSE, $context);
+            $result = file_get_contents(self::API_URL . $apiPath, FALSE, $context);
 
             if (!$result)
             {
