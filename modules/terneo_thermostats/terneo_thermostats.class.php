@@ -572,7 +572,7 @@
                     $rec_val['VALUE'] = $device['data']['temp_setpoint'];
                     $rec_vals[] = $rec_val;
                 }
-                
+
                 if (is_array($device['data']) and isset($device['data']['temp_current']))
                 {
                     $rec_val['DEVICE_ID'] = $deviceId;
@@ -618,7 +618,7 @@
                     $rec_val['DEVICE_ID'] = $deviceId;
                     $rec_val['DEVICE_SID'] = $sid;
                     $rec_val['TITLE'] = "temp_mode_type";
-                    $rec_val['DESCRIPTION'] = "(R/O) Режим температуры";
+                    $rec_val['DESCRIPTION'] = "(R/O) Вид режима температуры";
                     $rec_val['VALUE'] = $device['data']['temp_mode_type'];
                     $rec_vals[] = $rec_val;
                 }
