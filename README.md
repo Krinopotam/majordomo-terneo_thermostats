@@ -1,2 +1,2 @@
 # majordomo-terneo_thermostats
-Интеграция Wi-Fi терморегуляторов Terneo (модели ax, sx)
+Интеграция в Majordomo Wi-Fi терморегуляторов Terneo (модели ax, sx)
