@@ -1,96 +1,87 @@
-
 <!-- table zwave_devices search -->
 <div>
- [ <a href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> ]
+    [ <a href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> ]
 </div>
 <div style="display:none" id='api_settings'>
-&nbsp;
-<form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
-<fieldset>
-<div class="form-group">
- <label class="control-label"[#if ERR_API_URL#] style="color:red;font-weight:bold"[#endif#]>
- API URL:
- </label>
- <div class="controls">[#API_URL#]</div>
+    &nbsp;
+    <form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
+        <fieldset>
+            <div class="form-group">
+                <label class="control-label" [#if ERR_API_URL#] style="color:red;font-weight:bold" [#endif#]>API URL:</label>
+                <div class="controls">[#API_URL#]</div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" [#if ERR_API_USERNAME#] style="color:red;font-weight:bold" [#endif#]>API Username*:</label>
+                <div class="controls"><input type="text" name="api_username" value="[#API_USERNAME#]" class="input"></div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" [#if ERR_API_PASSWORD#] style="color:red;font-weight:bold" [#endif#]>API Password*:</label>
+                <div class="controls"><input type="password" name="api_password" value="[#API_PASSWORD#]" class="input"></div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" [#if ERR_API_KEY#] style="color:red;font-weight:bold" [#endif#]>API KEY:</label>
+                <div class="controls"><input type="text" name="api_key" value="[#API_KEY#]" class="input"></div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" [#if ERR_UPDATE_PERIOD#] style="color:red;font-weight:bold" [#endif#]>Период опроса (сек.)*:</label>
+                <div class="controls"><input type="text" name="update_period" value="[#UPDATE_PERIOD#]" class="input"></div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_UPDATE#></button>
+                <input type="hidden" name="view_mode" value="update_settings">
+                <input type="hidden" name="mode" value="update">
+            </div>
+        </fieldset>
+    </form>
 </div>
-<div class="form-group">
- <label class="control-label"[#if ERR_API_USERNAME#] style="color:red;font-weight:bold"[#endif#]>
- API Username*:
- </label>
- <div class="controls"><input type="text" name="api_username" value="[#API_USERNAME#]" class="input"></div>
-</div>
-<div class="form-group">
- <label class="control-label"[#if ERR_API_PASSWORD#] style="color:red;font-weight:bold"[#endif#]>
- API Password*:
- </label>
- <div class="controls"><input type="password" name="api_password" value="[#API_PASSWORD#]" class="input"></div>
-</div>
-<div class="form-group">
- <label class="control-label"[#if ERR_API_KEY#] style="color:red;font-weight:bold"[#endif#]>
- API KEY:
- </label>
- <div class="controls"><input type="text" name="api_key" value="[#API_KEY#]" class="input"></div>
-</div>
-<div class="form-actions">
-<button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_UPDATE#></button>
-<input type="hidden" name="view_mode" value="update_settings">
-<input type="hidden" name="mode" value="update">
-</div>
-</fieldset>
-</form>
-</div>
- <!-- action usual -->
- [#if DATA_SOURCE="terneo_thermostats" || DATA_SOURCE=""#]
- <!-- table terneo_thermostats search -->
- [#if VIEW_MODE="search_terneo_thermostats" || VIEW_MODE=""#]
-  [#inc terneo_thermostats_search_admin.html#]
- [#endif VIEW_MODE#]
- <!-- / table terneo_thermostats search -->
- <!-- table terneo_thermostats edit -->
- [#if VIEW_MODE="edit_terneo_thermostats"#]
-   [#if ID!=""#]
-   [#if TITLE!=""#]<h4>[#TITLE#]</h4>[#endif TITLE#]
+<!-- action usual -->
+[#if DATA_SOURCE="terneo_thermostats" || DATA_SOURCE=""#]
+<!-- table terneo_thermostats search -->
+[#if VIEW_MODE="search_terneo_thermostats" || VIEW_MODE=""#]
+[#inc terneo_thermostats_search_admin.html#]
+[#endif VIEW_MODE#]
+<!-- / table terneo_thermostats search -->
+<!-- table terneo_thermostats edit -->
+[#if VIEW_MODE="edit_terneo_thermostats"#]
+[#if ID!=""#]
+[#if TITLE!=""#]<h4>[#TITLE#]</h4>[#endif TITLE#]
 <ul class="nav nav-tabs">
-  <li[#if TAB=""#] class="active"[#endif#]>
-   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab="><#LANG_GENERAL#></a>
-  </li>
-  <li[#if TAB="data"#] class="active"[#endif#]>
-   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a>
-  </li>
+    <li [#if TAB=""#] class="active"[#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab="><#LANG_GENERAL#></a></li>
+    <li [#if TAB="data"#] class="active"[#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a></li>
 </ul>
 &nbsp;<br/>
-   [#endif ID#]
-   [#if TAB=""#]
-    [#inc terneo_thermostats_edit_default.html#]
-   [#endif TAB#]
-   [#if TAB="data"#]
-    [#inc terneo_thermostats_edit_data.html#]
-   [#endif TAB#]
- [#endif VIEW_MODE#]
- <!-- / table terneo_thermostats edit -->
- <!-- table terneo_thermostats view -->
- [#if VIEW_MODE="view_terneo_thermostats"#]
-   [#if TAB=""#]
-    [#inc terneo_thermostats_view_default.html#]
-   [#endif TAB#]
- [#endif VIEW_MODE#]
- <!-- / table terneo_thermostats view -->
- [#endif DATA_SOURCE#]
- <!-- action usual -->
- [#if DATA_SOURCE="terneo_thermostat_values"#]
- <!-- table terneo_thermostat_values search -->
- [#if VIEW_MODE="search_terneo_thermostat_values" || VIEW_MODE=""#]
-  [#inc terneo_thermostat_values_search_admin.html#]
- [#endif VIEW_MODE#]
- <!-- / table terneo_thermostat_values search -->
- <!-- table terneo_thermostat_values edit -->
- [#if VIEW_MODE="edit_terneo_thermostat_values"#]
-   [#inc terneo_thermostat_values_edit.html#]
- [#endif VIEW_MODE#]
- <!-- / table terneo_thermostat_values edit -->
- <!-- table terneo_thermostat_values view -->
- [#if VIEW_MODE="view_terneo_thermostat_values"#]
-   [#inc terneo_thermostat_values_view.html#]
- [#endif VIEW_MODE#]
- <!-- / table terneo_thermostat_values view -->
- [#endif DATA_SOURCE#]
+[#endif ID#]
+[#if TAB=""#]
+[#inc terneo_thermostats_edit_default.html#]
+[#endif TAB#]
+[#if TAB="data"#]
+[#inc terneo_thermostats_edit_data.html#]
+[#endif TAB#]
+[#endif VIEW_MODE#]
+<!-- / table terneo_thermostats edit -->
+<!-- table terneo_thermostats view -->
+[#if VIEW_MODE="view_terneo_thermostats"#]
+[#if TAB=""#]
+[#inc terneo_thermostats_view_default.html#]
+[#endif TAB#]
+[#endif VIEW_MODE#]
+<!-- / table terneo_thermostats view -->
+[#endif DATA_SOURCE#]
+<!-- action usual -->
+[#if DATA_SOURCE="terneo_thermostat_values"#]
+<!-- table terneo_thermostat_values search -->
+[#if VIEW_MODE="search_terneo_thermostat_values" || VIEW_MODE=""#]
+[#inc terneo_thermostat_values_search_admin.html#]
+[#endif VIEW_MODE#]
+<!-- / table terneo_thermostat_values search -->
+<!-- table terneo_thermostat_values edit -->
+[#if VIEW_MODE="edit_terneo_thermostat_values"#]
+[#inc terneo_thermostat_values_edit.html#]
+[#endif VIEW_MODE#]
+<!-- / table terneo_thermostat_values edit -->
+<!-- table terneo_thermostat_values view -->
+[#if VIEW_MODE="view_terneo_thermostat_values"#]
+[#inc terneo_thermostat_values_view.html#]
+[#endif VIEW_MODE#]
+<!-- / table terneo_thermostat_values view -->
+[#endif DATA_SOURCE#]

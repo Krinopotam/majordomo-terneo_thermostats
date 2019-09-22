@@ -2,9 +2,17 @@
     /**
      * Термостаты Terneo
      * @package project
-     * @author Wizard <sergejey@gmail.com>
+     * @author Krinopotam <omegatester@gmail.com>
      * @copyright http://majordomo.smartliving.ru/ (c)
-     * @version 0.1 (wizard, 16:09:19 [Sep 01, 2018])
+     * @version 0.2 (wizard, 16:09:19 [Sep 01, 2018])
+     *
+     * @property string|int|null id
+     * @property string|int|null mode
+     * @property  string|int|null edit_mode
+     * @property  string|int|null view_mode
+     * @property  array|string|int|null data_source
+     * @property  array|string|int|null tab
+     * @property  array|string|int|null action
      */
     //
     //
@@ -34,6 +42,8 @@
          * Saving module parameters
          *
          * @access public
+         * @param int $data
+         * @return string|void
          */
         function saveParams($data = 1)
         {
@@ -147,6 +157,7 @@
          * Module backend
          *
          * @access public
+         * @param $out
          */
         function admin(&$out)
         {
@@ -159,6 +170,10 @@
             $out['API_KEY'] = $this->config['API_KEY'];
             $out['API_USERNAME'] = $this->config['API_USERNAME'];
             $out['API_PASSWORD'] = $this->config['API_PASSWORD'];
+
+            $out['UPDATE_PERIOD'] = $this->config['UPDATE_PERIOD'];
+            if (!$out['UPDATE_PERIOD']) { $out['UPDATE_PERIOD'] = '10'; }
+
             if ($this->view_mode == 'update_settings')
             {
                 global $api_url;
@@ -169,6 +184,8 @@
                 $this->config['API_USERNAME'] = $api_username;
                 global $api_password;
                 $this->config['API_PASSWORD'] = $api_password;
+                global $update_period;
+                $this->config['UPDATE_PERIOD'] = $update_period;
                 $this->saveConfig();
                 $this->redirect("?");
             }
@@ -219,6 +236,7 @@
          * Module frontend
          *
          * @access public
+         * @param $out
          */
         function usual(&$out)
         {
@@ -240,6 +258,7 @@
          * terneo_thermostats update
          *
          * @access public
+         * @param $out
          */
         function update_terneo_thermostats(&$out)
         {
@@ -251,6 +270,8 @@
          * terneo_thermostats edit/add
          *
          * @access public
+         * @param $out
+         * @param $id
          */
         function edit_terneo_thermostats(&$out, $id)
         {
@@ -261,6 +282,7 @@
          * terneo_thermostats delete record
          *
          * @access public
+         * @param $id
          */
         function delete_terneo_thermostats($id)
         {
@@ -274,6 +296,7 @@
          * terneo_thermostat_values search
          *
          * @access public
+         * @param $out
          */
         function search_terneo_thermostat_values(&$out)
         {
@@ -284,6 +307,8 @@
          * terneo_thermostat_values edit/add
          *
          * @access public
+         * @param $out
+         * @param $id
          */
         function edit_terneo_thermostat_values(&$out, $id)
         {
@@ -373,6 +398,7 @@
          * Module installation routine
          *
          * @access private
+         * @param string $data
          */
         function install($data = '')
         {
@@ -886,6 +912,7 @@
          * Database installation routine
          *
          * @access private
+         * @param string $data
          */
         function dbInstall($data)
         {
