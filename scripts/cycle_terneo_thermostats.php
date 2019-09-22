@@ -12,6 +12,7 @@
     //$ctl = new control_modules();
     include_once(DIR_MODULES . 'terneo_thermostats/terneo_thermostats.class.php');
     $terneo_thermostats_module = new terneo_thermostats();
+    setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
 
     while (TRUE)
     {
