@@ -267,6 +267,7 @@
             $rec = SQLSelectOne("SELECT * FROM terneo_thermostats WHERE ID='$id'");
             // some action for related tables
             SQLExec("DELETE FROM terneo_thermostats WHERE ID='" . $rec['ID'] . "'");
+            SQLExec("DELETE FROM terneo_thermostat_values WHERE DEVICE_ID='" . $rec['ID'] . "'");
         }
 
         /**
@@ -324,6 +325,17 @@
                             $isUpdated = TRUE;
                         }
                     }
+                    elseif ($properties[$i]['TITLE'] == 'childrenLock')
+                    {
+                        $properties[$i]['VALUE'] = $value;
+                        $result = $this->ApiPut("/device/" . $properties[$i]['DEVICE_SID'] . "/parameters/", '[{"key": "childrenLock", "value": ' . ($value==1 ? "true" : "false") . '}]');
+
+                        if (is_array($result) && isset($result[0]) && $result[0]['key'] == "childrenLock")
+                        {
+                            $confirmedValue = ($result[0]['value']=="False" ? 0 : 1);
+                            $isUpdated = TRUE;
+                        }
+                    }
                     elseif ($properties[$i]['TITLE'] == 'temp_setpoint')
                     {
                         $properties[$i]['VALUE'] = $value;
@@ -350,7 +362,7 @@
 
             $this->loadDevicesStatus();
 
-            DebMes("Цикл terneo_termostats отработал.");
+            //DebMes("Цикл terneo_termostats отработал.");
             //$this->debug ($equipments);
             //DebMes($this->config);
         }
@@ -549,13 +561,21 @@
                         $rec_val['VALUE'] = $parameterValue['value'];
                         $rec_vals[] = $rec_val;
                     }
-
                     elseif ($parameterValue['key'] == "powerOff")
                     {
                         $rec_val['DEVICE_ID'] = $deviceId;
                         $rec_val['DEVICE_SID'] = $sid;
                         $rec_val['TITLE'] = "powerOff";
                         $rec_val['DESCRIPTION'] = "(R/W) Выключение (0 - вкл, 1 - выкл.)";
+                        $rec_val['VALUE'] = ($parameterValue['value'] ? 1 : 0);
+                        $rec_vals[] = $rec_val;
+                    }
+                    elseif ($parameterValue['key'] == "childrenLock")
+                    {
+                        $rec_val['DEVICE_ID'] = $deviceId;
+                        $rec_val['DEVICE_SID'] = $sid;
+                        $rec_val['TITLE'] = "childrenLock";
+                        $rec_val['DESCRIPTION'] = "(R/W) Защита от детей (0 - вкл, 1 - выкл.)";
                         $rec_val['VALUE'] = ($parameterValue['value'] ? 1 : 0);
                         $rec_vals[] = $rec_val;
                     }
@@ -717,7 +737,6 @@
             {
                 $linkedValue = getGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY']);
 
-                $this->debug ("$linkedValue".$linkedValue);
                 if ($linkedValue!=$rec_val['VALUE'])
                 {
                     setGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY'], $rec_val['VALUE'], array($this->name => '0'));

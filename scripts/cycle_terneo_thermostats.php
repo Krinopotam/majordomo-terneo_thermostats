@@ -23,7 +23,7 @@ else
    $checkEvery=300; // poll every 5 minutes
 }
 
-echo date("H:i:s") . " running " . basename(__FILE__) . PHP_EOL;
+//echo date("H:i:s") . " running " . basename(__FILE__) . PHP_EOL;
 $latest_check=0;
 
 while (1)
