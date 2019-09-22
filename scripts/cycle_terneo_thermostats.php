@@ -16,12 +16,12 @@
 
     while (TRUE)
     {
-        $keenetic_lan_devices_module->getConfig();
-        $sleepTime = (int)$keenetic_lan_devices_module->config['UPDATE_PERIOD'];
+        $terneo_thermostats_module->getConfig();
+        $sleepTime = (int)$terneo_thermostats_module->config['UPDATE_PERIOD'];
 
         if ($sleepTime == 0) //'период обновления не указан, значит не обновляем, пока не будет указан
         {
-            sleep(30);
+            sleep(60);
             setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
             continue;
         }
