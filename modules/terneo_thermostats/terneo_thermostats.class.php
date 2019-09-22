@@ -172,7 +172,7 @@
             $out['API_PASSWORD'] = $this->config['API_PASSWORD'];
 
             $out['UPDATE_PERIOD'] = $this->config['UPDATE_PERIOD'];
-            if (!$out['UPDATE_PERIOD']) { $out['UPDATE_PERIOD'] = '10'; }
+            if (!$out['UPDATE_PERIOD']) { $out['UPDATE_PERIOD'] = '60'; }
 
             if ($this->view_mode == 'update_settings')
             {
