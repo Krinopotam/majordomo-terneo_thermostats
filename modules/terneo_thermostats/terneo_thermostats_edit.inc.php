@@ -21,6 +21,16 @@
                 $out['ERR_TITLE'] = 1;
                 $ok = 0;
             }
+
+            if ( $this->config['API_MODE']==1)
+            {
+                $rec['IP'] = gr('ip');
+                if ($rec['IP'] == '')
+                {
+                    $out['ERR_IP'] = 1;
+                    $ok = 0;
+                }
+            }
         }
 
         // step: data

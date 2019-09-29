@@ -15,6 +15,13 @@
             <label for="title" class="col-lg-3 control-label"><#LANG_TITLE#>:(*)</label>
             <div class="col-lg-9"><input id="title" name="title" value="[#TITLE#]" type="text" class="form-control"></div>
         </div>
+        [#if API_MODE="1"#]
+        <!-- IP (varchar) -->
+        <div class="form-group[#if ERR_IP#] has-error[#endif#]">
+            <label for="ip" class="col-lg-3 control-label">IP:(*)</label>
+            <div class="col-lg-9"><input id="ip" name="ip" value="[#IP#]" type="text" class="form-control"></div>
+        </div>
+        [#endif API_MODE#]
         <!-- SID (varchar) -->
         [#if API_MODE="0"#]
         <div class="form-group[#if ERR_SID#] has-error[#endif#]">
@@ -26,11 +33,6 @@
         <div class="form-group[#if ERR_SN#] has-error[#endif#]">
             <label for="sn" class="col-lg-3 control-label">SN:</label>
             <div class="col-lg-9">[#SN#]</div>
-        </div>
-        <!-- IP (varchar) -->
-        <div class="form-group[#if ERR_SN#] has-error[#endif#]">
-            <label for="ip" class="col-lg-3 control-label">IP:</label>
-            <div class="col-lg-9">[#IP#]</div>
         </div>
         <!-- DEVICE_NAME (varchar) -->
         [#if API_MODE="0"#]
