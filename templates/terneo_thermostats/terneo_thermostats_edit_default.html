@@ -16,29 +16,40 @@
             <div class="col-lg-9"><input id="title" name="title" value="[#TITLE#]" type="text" class="form-control"></div>
         </div>
         <!-- SID (varchar) -->
+        [#if API_MODE="0"#]
         <div class="form-group[#if ERR_SID#] has-error[#endif#]">
             <label for="sid" class="col-lg-3 control-label">SID:</label>
             <div class="col-lg-9">[#SID#]</div>
         </div>
+        [#endif API_MODE#]
         <!-- SN (varchar) -->
         <div class="form-group[#if ERR_SN#] has-error[#endif#]">
             <label for="sn" class="col-lg-3 control-label">SN:</label>
             <div class="col-lg-9">[#SN#]</div>
         </div>
+        <!-- IP (varchar) -->
+        <div class="form-group[#if ERR_SN#] has-error[#endif#]">
+            <label for="ip" class="col-lg-3 control-label">IP:</label>
+            <div class="col-lg-9">[#IP#]</div>
+        </div>
         <!-- DEVICE_NAME (varchar) -->
+        [#if API_MODE="0"#]
         <div class="form-group[#if ERR_DEVICE_NAME#] has-error[#endif#]">
-            <label for="device_name" class="col-lg-3 control-label">DEVICE_NAME:</label>
+            <label for="device_name" class="col-lg-3 control-label">Имя в облаке:</label>
             <div class="col-lg-9">[#DEVICE_NAME#]</div>
         </div>
+        [#endif API_MODE#]
         <!-- FIRMWARE (varchar) -->
+        [#if API_MODE="0"#]
         <div class="form-group[#if ERR_FIRMWARE#] has-error[#endif#]">
-            <label for="firmware" class="col-lg-3 control-label">FIRMWARE:</label>
+            <label for="firmware" class="col-lg-3 control-label">Firmware:</label>
             <div class="col-lg-9">[#FIRMWARE#]</div>
         </div>
+        [#endif API_MODE#]
         <!-- UPDATED (datetime) -->
         <div class="form-group[#if ERR_UPDATED#] has-error[#endif#]">
             <label class="col-lg-3 control-label" [#if ERR_UPDATED#] style="color:red;font-weight:bold" [#endif#]><#LANG_UPDATED#>:</label>
-            <div class="col-lg-4">[#UPDATED_DATE#]</div>
+            <div class="col-lg-4">[#UPDATED#]</div>
         </div>
         <div class="form-group">
             <div class="col-lg-offset-3 col-lg-4">

@@ -1,87 +1,129 @@
-<!-- table zwave_devices search -->
-<div>
-    [ <a href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> ]
+<!-- table terneo_thermostats_devices search -->
+<div class="row">
+    <div class="col-md-4">
+        <a class="btn btn-default" href="#api_settings" data-toggle="collapse"><i class="glyphicon glyphicon-cog"></i> Настройки</a>
+    </div>
 </div>
-<div style="display:none" id='api_settings'>
+
+<div class="collapse" id='api_settings'>
     &nbsp;
     <form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
         <fieldset>
+            <script>
+                function toggleMode() {
+                    var selector = document.getElementById('api_mode');
+                    var apiModerCloud = document.getElementById('api_mode_cloud');
+
+                    if (selector.value == 0) {
+                        apiModerCloud.style.display = 'block';
+                    }
+                    else {
+                        apiModerCloud.style.display = 'none';
+                    }
+                }
+            </script>
             <div class="form-group">
-                <label class="control-label" [#if ERR_API_URL#] style="color:red;font-weight:bold" [#endif#]>API URL:</label>
-                <div class="controls">[#API_URL#]</div>
+                <label class="control-label">
+                    Режим:
+                    <span class='support-hover' tabindex="1" data-title="Режим управления термостатами - локальный или через облако."><i class="glyphicon glyphicon-info-sign"></i></span>
+                </label>
+                <div class="col-lg-4">
+                    <select name="api_mode" id="api_mode" class="form-control" onchange="toggleMode()" >
+                        <option value="0" [#if API_MODE="0"#] selected[#endif#]>Через облако</option>
+                        <option value="1" [#if API_MODE="1"#] selected[#endif#]>Локально</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="control-label" [#if ERR_API_USERNAME#] style="color:red;font-weight:bold" [#endif#]>API Username*:</label>
-                <div class="controls"><input type="text" name="api_username" value="[#API_USERNAME#]" class="input"></div>
+
+            <div id='api_mode_cloud'[#if API_MODE="1"#] style="display:none"[#endif#]>
+                <div class="form-group">
+                    <label class="control-label" [#if ERR_API_URL#] style="color:red;font-weight:bold" [#endif#]>API URL:</label>
+                    <div class="col-lg-4">[#API_URL#]</div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" [#if ERR_API_USERNAME#] style="color:red;font-weight:bold" [#endif#]>API Username*:</label>
+                    <div class="col-lg-4"><input type="text" name="api_username" value="[#API_USERNAME#]" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" [#if ERR_API_PASSWORD#] style="color:red;font-weight:bold" [#endif#]>API Password*:</label>
+                    <div class="col-lg-4"><input type="password" name="api_password" value="[#API_PASSWORD#]" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" [#if ERR_API_KEY#] style="color:red;font-weight:bold" [#endif#]>API KEY:</label>
+                    <div class="col-lg-4"><input type="text" name="api_key" value="[#API_KEY#]" class="form-control"></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="control-label" [#if ERR_API_PASSWORD#] style="color:red;font-weight:bold" [#endif#]>API Password*:</label>
-                <div class="controls"><input type="password" name="api_password" value="[#API_PASSWORD#]" class="input"></div>
-            </div>
-            <div class="form-group">
-                <label class="control-label" [#if ERR_API_KEY#] style="color:red;font-weight:bold" [#endif#]>API KEY:</label>
-                <div class="controls"><input type="text" name="api_key" value="[#API_KEY#]" class="input"></div>
-            </div>
+
             <div class="form-group">
                 <label class="control-label" [#if ERR_UPDATE_PERIOD#] style="color:red;font-weight:bold" [#endif#]>Период опроса (сек.)*:</label>
-                <div class="controls"><input type="text" name="update_period" value="[#UPDATE_PERIOD#]" class="input"></div>
+                <div class="col-lg-4"><input type="text" name="update_period" value="[#UPDATE_PERIOD#]" class="form-control"></div>
             </div>
+
+            <div class="form-group">
+                <div class="controls"><input type="checkbox" name="api_log_debmes" value="1"[#if API_LOG_DEBMES="1"#] checked[#endif#]>
+                    Отладка DebMes
+                    <span class='support-hover' tabindex="1" data-title="Запись ошибок в отдельный лог-файл YYYY-mm-dd_terneo_thermostats.log."><i class="glyphicon glyphicon-info-sign"></i></span>
+                </div>
+            </div>
+
             <div class="form-actions">
-                <button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_UPDATE#></button>
+                <button type="submit" name="subm" value="Submit" class="btn btn-primary">Сохранить</button>
                 <input type="hidden" name="view_mode" value="update_settings">
                 <input type="hidden" name="mode" value="update">
             </div>
         </fieldset>
     </form>
 </div>
+<hr>
 <!-- action usual -->
 [#if DATA_SOURCE="terneo_thermostats" || DATA_SOURCE=""#]
-<!-- table terneo_thermostats search -->
-[#if VIEW_MODE="search_terneo_thermostats" || VIEW_MODE=""#]
-[#inc terneo_thermostats_search_admin.html#]
-[#endif VIEW_MODE#]
-<!-- / table terneo_thermostats search -->
-<!-- table terneo_thermostats edit -->
-[#if VIEW_MODE="edit_terneo_thermostats"#]
-[#if ID!=""#]
-[#if TITLE!=""#]<h4>[#TITLE#]</h4>[#endif TITLE#]
-<ul class="nav nav-tabs">
-    <li [#if TAB=""#] class="active"[#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab="><#LANG_GENERAL#></a></li>
-    <li [#if TAB="data"#] class="active"[#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a></li>
-</ul>
-&nbsp;<br/>
-[#endif ID#]
-[#if TAB=""#]
-[#inc terneo_thermostats_edit_default.html#]
-[#endif TAB#]
-[#if TAB="data"#]
-[#inc terneo_thermostats_edit_data.html#]
-[#endif TAB#]
-[#endif VIEW_MODE#]
-<!-- / table terneo_thermostats edit -->
-<!-- table terneo_thermostats view -->
-[#if VIEW_MODE="view_terneo_thermostats"#]
-[#if TAB=""#]
-[#inc terneo_thermostats_view_default.html#]
-[#endif TAB#]
-[#endif VIEW_MODE#]
-<!-- / table terneo_thermostats view -->
+    <!-- table terneo_thermostats search -->
+    [#if VIEW_MODE="search_terneo_thermostats" || VIEW_MODE=""#]
+        [#inc terneo_thermostats_search_admin.html#]
+    [#endif VIEW_MODE#]
+    <!-- / table terneo_thermostats search -->
+    <!-- table terneo_thermostats edit -->
+    [#if VIEW_MODE="edit_terneo_thermostats"#]
+        [#if ID!=""#]
+            [#if TITLE!=""#]<h4>[#TITLE#]</h4>[#endif TITLE#]
+                <ul class="nav nav-tabs">
+                    <li [#if TAB=""#] class="active"[#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab="><#LANG_GENERAL#></a></li>
+                    <li [#if TAB="data"#] class="active"[#endif#]><a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a></li>
+                </ul>
+                &nbsp;<br/>
+        [#endif ID#]
+        [#if TAB=""#]
+            [#inc terneo_thermostats_edit_default.html#]
+        [#endif TAB#]
+        [#if TAB="data"#]
+            [#inc terneo_thermostats_edit_data.html#]
+        [#endif TAB#]
+    [#endif VIEW_MODE#]
+    <!-- / table terneo_thermostats edit -->
+    <!-- table terneo_thermostats view -->
+    [#if VIEW_MODE="view_terneo_thermostats"#]
+        [#if TAB=""#]
+            [#inc terneo_thermostats_view_default.html#]
+        [#endif TAB#]
+    [#endif VIEW_MODE#]
+    <!-- / table terneo_thermostats view -->
 [#endif DATA_SOURCE#]
+
 <!-- action usual -->
 [#if DATA_SOURCE="terneo_thermostat_values"#]
-<!-- table terneo_thermostat_values search -->
-[#if VIEW_MODE="search_terneo_thermostat_values" || VIEW_MODE=""#]
-[#inc terneo_thermostat_values_search_admin.html#]
-[#endif VIEW_MODE#]
-<!-- / table terneo_thermostat_values search -->
-<!-- table terneo_thermostat_values edit -->
-[#if VIEW_MODE="edit_terneo_thermostat_values"#]
-[#inc terneo_thermostat_values_edit.html#]
-[#endif VIEW_MODE#]
-<!-- / table terneo_thermostat_values edit -->
-<!-- table terneo_thermostat_values view -->
-[#if VIEW_MODE="view_terneo_thermostat_values"#]
-[#inc terneo_thermostat_values_view.html#]
-[#endif VIEW_MODE#]
-<!-- / table terneo_thermostat_values view -->
+    <!-- table terneo_thermostat_values search -->
+    [#if VIEW_MODE="search_terneo_thermostat_values" || VIEW_MODE=""#]
+        [#inc terneo_thermostat_values_search_admin.html#]
+    [#endif VIEW_MODE#]
+    <!-- / table terneo_thermostat_values search -->
+    <!-- table terneo_thermostat_values edit -->
+    [#if VIEW_MODE="edit_terneo_thermostat_values"#]
+        [#inc terneo_thermostat_values_edit.html#]
+    [#endif VIEW_MODE#]
+    <!-- / table terneo_thermostat_values edit -->
+    <!-- table terneo_thermostat_values view -->
+    [#if VIEW_MODE="view_terneo_thermostat_values"#]
+        [#inc terneo_thermostat_values_view.html#]
+    [#endif VIEW_MODE#]
+    <!-- / table terneo_thermostat_values view -->
 [#endif DATA_SOURCE#]

@@ -51,53 +51,8 @@
     // step: default
     if ($this->tab == '')
     {
-        if ($rec['UPDATED'] != '')
-        {
-            $tmp = explode(' ', $rec['UPDATED']);
-            $out['UPDATED_DATE'] = fromDBDate($tmp[0]);
-            $tmp2 = explode(':', $tmp[1]);
-            $updated_hours = $tmp2[0];
-            $updated_minutes = $tmp2[1];
-        }
-
-        for ($i = 0; $i < 60; $i++)
-        {
-            $title = $i;
-            if ($i < 10)
-            {
-                $title = "0$i";
-            }
-            if ($title == $updated_minutes)
-            {
-                $out['UPDATED_MINUTES'][] = array('TITLE' => $title, 'SELECTED' => 1);
-            }
-            else
-            {
-                $out['UPDATED_MINUTES'][] = array('TITLE' => $title);
-            }
-        }
-        for ($i = 0; $i < 24; $i++)
-        {
-            $title = $i;
-            if ($i < 10)
-            {
-                $title = "0$i";
-            }
-            if ($title == $updated_hours)
-            {
-                $out['UPDATED_HOURS'][] = array('TITLE' => $title, 'SELECTED' => 1);
-            }
-            else
-            {
-                $out['UPDATED_HOURS'][] = array('TITLE' => $title);
-            }
-        }
     }
     // step: data
-    if ($this->tab == 'data')
-    {
-    }
-
     if ($this->tab == 'data')
     {
         //dataset2

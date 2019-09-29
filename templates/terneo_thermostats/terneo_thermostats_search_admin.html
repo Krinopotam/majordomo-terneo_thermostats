@@ -1,8 +1,24 @@
 <!-- table terneo_thermostats search -->
+<div [#if STATUS_ERROR=""#] style="display:none"[#endif#]>
+    <p></p>
+    <div class="alert alert-danger" role="alert">[#STATUS_ERROR#]</div>
+</div>
+
 <p></p>
-<p>
-    <a href="?view_mode=update_terneo_thermostats" class="btn btn-default"><i class="glyphicon glyphicon-refresh"></i><#LANG_UPDATE#></a>
-</p>
+<div class="row">
+    <div class="col-md-2">
+        <a href="?view_mode=update_terneo_thermostats" class="btn btn-default"><i class="glyphicon glyphicon-refresh"></i> <#LANG_UPDATE#></a>
+    </div>
+
+    <div class="col-md-2">
+        <a href="?view_mode=discover_local_thermostats" class="btn btn-default" id='discover_devices_btn'[#if API_MODE="0"#] style="display:none"[#endif#]><i class="glyphicon glyphicon-signal"></i> Сканировать</a>
+    </div>
+
+    <div class="col-md-8">
+        [#module name="xray" action="service" cycle="terneo_thermostats"#]
+    </div>
+</div>
+
 <table width=100% border=0>
     <tr>
         <td valign=top>
@@ -35,10 +51,11 @@
                         <th><a href="?sortby=TITLE">
                             <#LANG_TITLE#>
                         </a></th>
-                        <th><a href="?sortby=SID">SID</a></th>
+                        [#if API_MODE="0"#]<th><a href="?sortby=SID">SID</a></th>[#endif#]
                         <th><a href="?sortby=SN">Серийный номер</a></th>
-                        <th><a href="?sortby=DEVICE_NAME">Имя устройства</a></th>
-                        <th><a href="?sortby=FIRMWARE">Прошивка</a></th>
+                        [#if API_MODE="0"#]<th><a href="?sortby=FIRMWARE">Прошивка</a></th>[#endif#]
+                        [#if API_MODE="1"#]<th><a href="?sortby=IP">IP</a></th>[#endif#]
+                        [#if API_MODE="0"#]<th><a href="?sortby=DEVICE_NAME">Название в облаке</a></th>[#endif#]
                         <th><a href="?sortby=UPDATED">
                             <#LANG_UPDATED#>
                         </a></th>
@@ -47,13 +64,17 @@
                     [#begin RESULT#]
                     <tr>
                         <td><b>[#TITLE#]</b></td>
-                        <td>
-                            [#if SID!=""#]
-                                [#SID#]
-                            [#else#]
-                                &nbsp;
-                            [#endif#]
-                        </td>
+
+                        [#if API_MODE="0"#]
+                            <td>
+                                [#if SID!=""#]
+                                    [#SID#]
+                                [#else#]
+                                    &nbsp;
+                                [#endif#]
+                            </td>
+                        [#endif#]
+
                         <td>
                             [#if SN!=""#]
                                 [#SN#]
@@ -61,20 +82,36 @@
                                 &nbsp;
                             [#endif#]
                         </td>
-                        <td>
-                            [#if DEVICE_NAME!=""#]
-                                [#DEVICE_NAME#]
-                            [#else#]
-                                &nbsp;
-                            [#endif#]
-                        </td>
-                        <td>
-                            [#if FIRMWARE!=""#]
-                                [#FIRMWARE#]
-                            [#else#]
-                                &nbsp;
-                            [#endif#]
-                        </td>
+                        
+                        [#if API_MODE="0"#]
+                            <td>
+                                [#if FIRMWARE!=""#]
+                                    [#FIRMWARE#]
+                                [#else#]
+                                    &nbsp;
+                                [#endif#]
+                            </td>
+                        [#endif#]
+
+                        [#if API_MODE="1"#]
+                            <td>
+                                [#if IP!=""#]
+                                    [#IP#]
+                                [#else#]
+                                    &nbsp;
+                                [#endif#]
+                            </td>
+                        [#endif#]
+                        [#if API_MODE="0"#]
+                            <td>
+                                [#if DEVICE_NAME!=""#]
+                                    [#DEVICE_NAME#]
+                                [#else#]
+                                    &nbsp;
+                                [#endif#]
+                            </td>
+                        [#endif#]
+
                         <td>
                             [#if UPDATED!=""#]
                                 [#UPDATED#]

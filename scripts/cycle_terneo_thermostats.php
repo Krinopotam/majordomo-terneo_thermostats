@@ -12,20 +12,20 @@
     //$ctl = new control_modules();
     include_once(DIR_MODULES . 'terneo_thermostats/terneo_thermostats.class.php');
     $terneo_thermostats_module = new terneo_thermostats();
-    setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
+    $terneo_thermostats_module->getConfig();
+    $sleepTime = (int)$terneo_thermostats_module->config['UPDATE_PERIOD'];
+
+    if ($sleepTime == 0)
+    {
+        setGlobal('cycle_terneo_thermostats', 'stop');
+        setGlobal('cycle_terneo_thermostats', '0');
+        exit;
+    }
+
+    setGlobal('cycle_terneo_thermostats', '1');
 
     while (TRUE)
     {
-        $terneo_thermostats_module->getConfig();
-        $sleepTime = (int)$terneo_thermostats_module->config['UPDATE_PERIOD'];
-
-        if ($sleepTime == 0) //'период обновления не указан, значит не обновляем, пока не будет указан
-        {
-            sleep(60);
-            setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
-            continue;
-        }
-
         setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
 
         $terneo_thermostats_module->processCycle();
