@@ -849,7 +849,7 @@
         function discoverLocalThermostats()
         {
             set_time_limit(0);
-            if ($this->config['API_LOG_DEBMES']) DebMes("========Start function discoverLocalThermostats===========", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("========Start discoverLocalThermostats===========", 'terneo_thermostats');
             //Create a UDP socket
             if ($this->config['API_LOG_DEBMES']) DebMes("Creating sockets SOL_UDP", 'terneo_thermostats');
             if(!($socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP)))
@@ -927,7 +927,7 @@
                 if ($this->config['API_LOG_DEBMES']) DebMes("Socket closed", 'terneo_thermostats');
             }
 
-            if ($this->config['API_LOG_DEBMES']) DebMes("========End function discoverLocalThermostats===========", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("========End discoverLocalThermostats===========", 'terneo_thermostats');
         }
 
         /**
@@ -1262,6 +1262,7 @@
                 }
             }
 
+            usleep(100000);
             $request = array("cmd"=>4);
             $rowTelemetry = $this->ApiGetFromLocal($ip, $request);
 
@@ -1383,10 +1384,14 @@
          */
         private function ApiGetFromLocal($ip, array $data = NULL)
         {
+            if ($this->config['API_LOG_DEBMES']) DebMes("========Start ApiGetFromLocal(ip: ".$ip.", data: ".$data.")===========", 'terneo_thermostats');
+
             if ($ip == '' || $data == NULL) {return NULL;}
 
             $url = 'http://'.$ip.'/api.cgi';
             $content = trim(json_encode($data,JSON_UNESCAPED_UNICODE));
+
+            if ($this->config['API_LOG_DEBMES']) DebMes("Send request url: ".$url." content: ".$content, 'terneo_thermostats');
 
             // use key 'http' even if you send the request to https://...
             $options = array(
@@ -1399,6 +1404,9 @@
 
             $context  = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
+
+            if ($this->config['API_LOG_DEBMES']) DebMes("========End ApiGetFromLocal result: ".trim($result)."===========", 'terneo_thermostats');
+
             if (!$result) {return NULL;}
 
             return $this->json_array(trim($result));
@@ -1414,6 +1422,8 @@
          */
         private function ApiSetToLocal($ip, $sn, array $data = NULL)
         {
+            if ($this->config['API_LOG_DEBMES']) DebMes("========Start ApiSetToLocal(ip: ".$ip.",sn: ".$sn.", data: ".$data.")===========", 'terneo_thermostats');
+
             if ($ip == '' || $sn=='' || $data == NULL) {return NULL;}
 
             $url = 'http://'.$ip.'/api.cgi';
@@ -1422,6 +1432,8 @@
             $contentArr['sn'] = $sn;
             $contentArr['par'] = array($data);
             $content = trim(json_encode($contentArr,JSON_UNESCAPED_UNICODE));
+
+            if ($this->config['API_LOG_DEBMES']) DebMes("Send request url: ".$url." content: ".$content, 'terneo_thermostats');
 
             // use key 'http' even if you send the request to https://...
             $options = array(
@@ -1434,6 +1446,9 @@
 
             $context  = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
+
+            if ($this->config['API_LOG_DEBMES']) DebMes("========End ApiSetToLocal result: ".trim($result)."===========", 'terneo_thermostats');
+
             if (!$result) {return NULL;}
 
             return $this->json_array(trim($result));
