@@ -1403,7 +1403,18 @@
             );
 
             $context  = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
+
+            try
+            {
+                $result = @file_get_contents($url, false, $context);
+
+            }
+            catch(Exception $e)
+            {
+                if ($this->config['API_LOG_DEBMES']) DebMes("ApiGetFromLocal. Ошибка получения данных из ".$ip, 'terneo_thermostats');
+                echo("ApiGetFromLocal. Ошибка получения данных из ".$ip);
+                return NULL;
+            }
 
             if ($this->config['API_LOG_DEBMES']) DebMes("========End ApiGetFromLocal result: ".trim($result)."===========", 'terneo_thermostats');
 
@@ -1445,7 +1456,17 @@
             );
 
             $context  = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
+
+            try
+            {
+                $result = @file_get_contents($url, false, $context);
+            }
+            catch(Exception $e)
+            {
+                if ($this->config['API_LOG_DEBMES']) DebMes("ApiSetToLocal. Ошибка отправки данных на ".$ip, 'terneo_thermostats');
+                echo("ApiGetFromLocal. Ошибка получения данных из ".$ip);
+                return NULL;
+            }
 
             if ($this->config['API_LOG_DEBMES']) DebMes("========End ApiSetToLocal result: ".trim($result)."===========", 'terneo_thermostats');
 
