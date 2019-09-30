@@ -30,6 +30,13 @@
                     $out['ERR_IP'] = 1;
                     $ok = 0;
                 }
+
+                $rec['SN'] = gr('sn');
+                if ($rec['SN'] == '')
+                {
+                    $out['ERR_IP'] = 1;
+                    $ok = 0;
+                }
             }
         }
 

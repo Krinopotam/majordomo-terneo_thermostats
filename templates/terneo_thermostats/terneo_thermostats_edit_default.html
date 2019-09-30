@@ -25,14 +25,14 @@
         <!-- SID (varchar) -->
         [#if API_MODE="0"#]
         <div class="form-group[#if ERR_SID#] has-error[#endif#]">
-            <label for="sid" class="col-lg-3 control-label">SID:</label>
+            <label for="sid" class="col-lg-3 control-label">SID:(*)</label>
             <div class="col-lg-9">[#SID#]</div>
         </div>
         [#endif API_MODE#]
         <!-- SN (varchar) -->
         <div class="form-group[#if ERR_SN#] has-error[#endif#]">
             <label for="sn" class="col-lg-3 control-label">SN:</label>
-            <div class="col-lg-9">[#SN#]</div>
+            <div class="col-lg-9"><input id="sn" name="sn" value="[#SN#]" type="text" class="form-control"></div>
         </div>
         <!-- DEVICE_NAME (varchar) -->
         [#if API_MODE="0"#]

@@ -6,16 +6,24 @@
 
 <p></p>
 <div class="row">
+    <div class="col-md-12">
+        [#module name="xray" action="service" cycle="terneo_thermostats"#]
+    </div>
+</div>
+<p></p>
+<div class="row">
+    [#if API_MODE="1"#]
+        <div class="col-md-2">
+            <a href="?view_mode=edit_terneo_thermostats&data_source=<#DATA_SOURCE#>" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> <#LANG_ADD#></a>
+        </div>
+    [#endif#]
+
     <div class="col-md-2">
         <a href="?view_mode=update_terneo_thermostats" class="btn btn-default"><i class="glyphicon glyphicon-refresh"></i> <#LANG_UPDATE#></a>
     </div>
 
     <div class="col-md-2">
         <a href="?view_mode=discover_local_thermostats" class="btn btn-default" id='discover_devices_btn'[#if API_MODE="0"#] style="display:none"[#endif#]><i class="glyphicon glyphicon-signal"></i> Сканировать</a>
-    </div>
-
-    <div class="col-md-8">
-        [#module name="xray" action="service" cycle="terneo_thermostats"#]
     </div>
 </div>
 
