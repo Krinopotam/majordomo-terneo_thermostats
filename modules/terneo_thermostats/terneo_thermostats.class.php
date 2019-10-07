@@ -849,14 +849,14 @@
         function discoverLocalThermostats()
         {
             set_time_limit(0);
-            if ($this->config['API_LOG_DEBMES']) DebMes("========Start discoverLocalThermostats===========", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("   --- Start discoverLocalThermostats (".date('Y-m-d H:i:s').") ------------", 'terneo_thermostats');
             //Create a UDP socket
-            if ($this->config['API_LOG_DEBMES']) DebMes("Creating sockets SOL_UDP", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("      Creating sockets SOL_UDP", 'terneo_thermostats');
             if(!($socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP)))
             {
                 $errorcode = socket_last_error();
                 $errormsg = "Couldn't create socket: [$errorcode] ".socket_strerror($errorcode);
-                if ($this->config['API_LOG_DEBMES']) DebMes($errormsg, 'terneo_thermostats');
+                if ($this->config['API_LOG_DEBMES']) DebMes("   *** ".$errormsg." ************", 'terneo_thermostats');
                 //die($errormsg."\n");
                 return;
             }
@@ -864,22 +864,22 @@
             try
             {
                 // Bind the source address
-                if ($this->config['API_LOG_DEBMES']) DebMes("Binding socket (0.0.0.0:23500)", 'terneo_thermostats');
+                if ($this->config['API_LOG_DEBMES']) DebMes("      Binding socket (0.0.0.0:23500)", 'terneo_thermostats');
                 if( !socket_bind($socket, "0.0.0.0" , 23500) ){
                     $errorcode = socket_last_error();
                     $errormsg = "Could not bind socket : [$errorcode]".socket_strerror($errorcode);
-                    if ($this->config['API_LOG_DEBMES']) DebMes($errormsg, 'terneo_thermostats');
+                    if ($this->config['API_LOG_DEBMES']) DebMes("   *** ".$errormsg." ************", 'terneo_thermostats');
                     //die($errormsg."\n");
                     return;
                 }
 
-                if ($this->config['API_LOG_DEBMES']) DebMes("Socket binded OK", 'terneo_thermostats');
+                if ($this->config['API_LOG_DEBMES']) DebMes("       Socket binded OK", 'terneo_thermostats');
 
                 socket_set_option($socket, SOL_SOCKET, SO_RCVTIMEO, array("sec"=>1, "usec"=>100));
                 socket_set_option($socket, SOL_SOCKET, SO_SNDTIMEO, array("sec"=>1, "usec"=>100));
 
                 $startDiscover = time();
-                if ($this->config['API_LOG_DEBMES']) DebMes("Listening socket", 'terneo_thermostats');
+                if ($this->config['API_LOG_DEBMES']) DebMes("      Listening socket", 'terneo_thermostats');
 
                 while(TRUE)
                 {
@@ -893,13 +893,13 @@
                         $errormsg = "Error reading: [$errorcode] ".socket_strerror($errorcode);
                         if ($errorcode!='11')
                         {
-                            if ($this->config['API_LOG_DEBMES']) DebMes($errormsg, 'terneo_thermostats');
+                            if ($this->config['API_LOG_DEBMES']) DebMes("   *** ".$errormsg." ************", 'terneo_thermostats');
                         }
                     }
 
                     if ($r=="") {continue;}
 
-                    if ($this->config['API_LOG_DEBMES']) DebMes($r, 'terneo_thermostats');
+                    if ($this->config['API_LOG_DEBMES']) DebMes("      ".$r, 'terneo_thermostats');
                     $deviceInfo=$this->json_array($r);
                     if (!isset($deviceInfo["sn"]) || $deviceInfo["sn"]=="") {continue;}
 
@@ -909,7 +909,7 @@
                     {
                         $rec['IP'] = $remote_ip;
                         SQLUpdate('terneo_thermostats', $rec);
-                        if ($this->config['API_LOG_DEBMES']) DebMes("Update existed thermostat IP: " . $remote_ip, 'terneo_thermostats');
+                        if ($this->config['API_LOG_DEBMES']) DebMes("      Update existed thermostat IP: " . $remote_ip, 'terneo_thermostats');
                     }
                     else //если нет, добавляем
                     {
@@ -917,17 +917,17 @@
                         $rec['SN'] = $deviceInfo["sn"];
                         $rec['IP'] = $remote_ip;
                         $rec['ID'] = SQLInsert('terneo_thermostats', $rec);
-                        if ($this->config['API_LOG_DEBMES']) DebMes("Added new thermostat: " . $deviceInfo["sn"]." [".$remote_ip."]", 'terneo_thermostats');
+                        if ($this->config['API_LOG_DEBMES']) DebMes("      Added new thermostat: " . $deviceInfo["sn"]." [".$remote_ip."]", 'terneo_thermostats');
                     }
                 }
             }
             finally
             {
                 socket_close($socket);
-                if ($this->config['API_LOG_DEBMES']) DebMes("Socket closed", 'terneo_thermostats');
+                if ($this->config['API_LOG_DEBMES']) DebMes("      Socket closed", 'terneo_thermostats');
             }
 
-            if ($this->config['API_LOG_DEBMES']) DebMes("========End discoverLocalThermostats===========", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("   --- End discoverLocalThermostats  (".date('Y-m-d H:i:s').") ------------", 'terneo_thermostats');
         }
 
         /**
@@ -1384,14 +1384,14 @@
          */
         private function ApiGetFromLocal($ip, array $data = NULL)
         {
-            if ($this->config['API_LOG_DEBMES']) DebMes("========Start ApiGetFromLocal(ip: ".$ip.", data: ".$data.")===========", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("   --- Start ApiGetFromLocal (time: ".date('Y-m-d H:i:s').", ip: ".$ip.", data: ".$data.") ------------", 'terneo_thermostats');
 
             if ($ip == '' || $data == NULL) {return NULL;}
 
             $url = 'http://'.$ip.'/api.cgi';
             $content = trim(json_encode($data,JSON_UNESCAPED_UNICODE));
 
-            if ($this->config['API_LOG_DEBMES']) DebMes("Send request url: ".$url." content: ".$content, 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("          Send request url: ".$url." content: ".$content, 'terneo_thermostats');
 
             // use key 'http' even if you send the request to https://...
             $options = array(
@@ -1411,12 +1411,12 @@
             }
             catch(Exception $e)
             {
-                if ($this->config['API_LOG_DEBMES']) DebMes("ApiGetFromLocal. Ошибка получения данных из ".$ip, 'terneo_thermostats');
+                if ($this->config['API_LOG_DEBMES']) DebMes("      *** ApiGetFromLocal. Ошибка получения данных из ".$ip." ***********", 'terneo_thermostats');
                 echo("ApiGetFromLocal. Ошибка получения данных из ".$ip);
                 return NULL;
             }
 
-            if ($this->config['API_LOG_DEBMES']) DebMes("========End ApiGetFromLocal result: ".trim($result)."===========", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("   --- End ApiGetFromLocal (".date('Y-m-d H:i:s').") result: ".trim($result)." ------------", 'terneo_thermostats');
 
             if (!$result) {return NULL;}
 
@@ -1433,7 +1433,7 @@
          */
         private function ApiSetToLocal($ip, $sn, array $data = NULL)
         {
-            if ($this->config['API_LOG_DEBMES']) DebMes("========Start ApiSetToLocal(ip: ".$ip.",sn: ".$sn.", data: ".$data.")===========", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("   --- Start ApiSetToLocal (time: ".date('Y-m-d H:i:s').", ip: ".$ip.",sn: ".$sn.", data: ".$data.") ------------", 'terneo_thermostats');
 
             if ($ip == '' || $sn=='' || $data == NULL) {return NULL;}
 
@@ -1444,7 +1444,7 @@
             $contentArr['par'] = array($data);
             $content = trim(json_encode($contentArr,JSON_UNESCAPED_UNICODE));
 
-            if ($this->config['API_LOG_DEBMES']) DebMes("Send request url: ".$url." content: ".$content, 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("         Send request url: ".$url." content: ".$content, 'terneo_thermostats');
 
             // use key 'http' even if you send the request to https://...
             $options = array(
@@ -1463,12 +1463,12 @@
             }
             catch(Exception $e)
             {
-                if ($this->config['API_LOG_DEBMES']) DebMes("ApiSetToLocal. Ошибка отправки данных на ".$ip, 'terneo_thermostats');
+                if ($this->config['API_LOG_DEBMES']) DebMes("      *** ApiSetToLocal. Ошибка отправки данных на ".$ip." *********", 'terneo_thermostats');
                 echo("ApiGetFromLocal. Ошибка получения данных из ".$ip);
                 return NULL;
             }
 
-            if ($this->config['API_LOG_DEBMES']) DebMes("========End ApiSetToLocal result: ".trim($result)."===========", 'terneo_thermostats');
+            if ($this->config['API_LOG_DEBMES']) DebMes("   --- End ApiSetToLocal  (".date('Y-m-d H:i:s').") result: ".trim($result)." ------------", 'terneo_thermostats');
 
             if (!$result) {return NULL;}
 
