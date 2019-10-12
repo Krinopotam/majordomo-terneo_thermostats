@@ -34,7 +34,7 @@
                 $rec['SN'] = gr('sn');
                 if ($rec['SN'] == '')
                 {
-                    $out['ERR_IP'] = 1;
+                    $out['ERR_SN'] = 1;
                     $ok = 0;
                 }
             }
