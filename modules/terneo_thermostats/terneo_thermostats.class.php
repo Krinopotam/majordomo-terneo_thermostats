@@ -1651,12 +1651,12 @@
                 SQLUpdate('terneo_thermostat_values', $rec_val);
             }
 
-            //если вдруг связанное свойство пустое (только привязали), то сразу его обновляем текущим значением
             if ($rec_val['LINKED_OBJECT'] && $rec_val['LINKED_PROPERTY'])
             {
                 $linkedValue = getGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY']);
 
-                if ($linkedValue!=$rec_val['VALUE'])
+                //если связанное свойство не равно текущему значению или текущее значение изменилось, то обновляем его текущим значением
+                if ($linkedValue!=$rec_val['VALUE'] || $old_value != $rec_val['VALUE'])
                 {
                     setGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY'], $rec_val['VALUE'], array($this->name => '0'));
                 }
@@ -1664,11 +1664,6 @@
 
             // Если значение метрики не изменилось, то выходим.
             if ($old_value == $rec_val['VALUE']) return;
-
-            // Иначе обновляем привязанное свойство.
-            if ($rec_val['LINKED_OBJECT'] && $rec_val['LINKED_PROPERTY']) {
-                setGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY'], $rec_val['VALUE'], array($this->name => '0'));
-            }
 
             // И вызываем привязанный метод.
             if ($rec_val['LINKED_OBJECT'] && $rec_val['LINKED_METHOD']) {
